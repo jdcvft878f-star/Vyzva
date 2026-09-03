@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="sk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+<title>Mesačná výzva</title>
+<style>
+  :root{
+    --bg: #12171B;
+    --surface: #1B2229;
+    --surface-2: #232C34;
+    --line: #303B44;
+    --text: #EDEFF1;
+    --text-dim: #8B98A3;
+    --accent: #35D0A0;
+    --accent-dim: #1E6F58;
+    --accent2: #FFB454;
+    --accent2-dim: #7A5B24;
+    --danger: #FF6B6B;
+  }
+  * { box-sizing: border-box; }
+  body{
+    margin:0; background:var(--bg); color:var(--text);
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    padding-bottom: 40px;
+  }
+  .wrap{ max-width: 480px; margin: 0 auto; padding: 20px 18px 10px; }
+
+  .hero{ padding: 6px 0 22px; }
+  .hero .kicker{ color: var(--text-dim); font-size: 14px; margin-bottom: 4px; }
+  .hero h1{
+    font-family: 'Barlow Condensed', 'Inter', sans-serif;
+    font-weight: 700; font-size: 40px; line-height: 1.05; margin: 0;
+    letter-spacing: 0.2px;
+  }
+  .hero .sub{ color: var(--text-dim); font-size: 15px; margin-top: 8px; }
+
+  .card{
+    background: var(--surface); border: 1px solid var(--line);
+    border-radius: 14px; padding: 18px; margin-bottom: 14px;
+  }
+  .card h2{
+    font-family: 'Barlow Condensed', sans-serif; font-weight: 600;
+    font-size: 22px; margin: 0 0 12px 0;
+  }
+
+  .row{ display:flex; gap: 10px; align-items: center; }
+  select, input[type=number], input[type=text]{
+    background: var(--surface-2); border: 1px solid var(--line); color: var(--text);
+    border-radius: 10px; padding: 12px 14px; font-size: 16px; width: 100%;
+  }
+  select:focus, input:focus{ outline: 2px solid var(--accent); outline-offset: 1px; }
+  button{
+    border: none; border-radius: 10px; padding: 12px 16px; font-size: 15px;
+    font-weight: 600; cursor: pointer; font-family: inherit;
+  }
+  .btn-primary{ background: var(--accent); color: #08221A; }
+  .btn-primary:active{ transform: scale(0.98); }
+  .btn-ghost{
+    background: var(--surface-2); color: var(--text); border: 1px solid var(--line);
+  }
+  .quickrow{ display:flex; gap:8px; margin-top: 10px; flex-wrap: wrap; }
+  .quickrow button{ flex: 1; min-width: 60px; padding: 10px 6px; }
+
+  .whoami{ display:flex; gap:8px; margin-bottom: 6px; }
+  .whoami select{ flex: 1; }
+
+  .barlabel{ display:flex; justify-content: space-between; align-items: baseline; margin-bottom: 6px; }
+  .barlabel .name{ font-size: 14px; color: var(--text-dim); }
+  .barlabel .nums{ font-family: 'Barlow Condensed', sans-serif; font-size: 20px; font-weight: 600; }
+  .barlabel .nums .goal{ color: var(--text-dim); font-weight: 400; font-size: 15px; }
+  .bartrack{
+    height: 14px; background: var(--surface-2); border-radius: 7px; overflow: hidden;
+    border: 1px solid var(--line);
+  }
+  .barfill{ height: 100%; border-radius: 7px; transition: width 0.4s ease; }
+  .barfill.week{ background: var(--accent); }
+  .barfill.month{ background: var(--accent2); }
+  .remain{ margin-top: 6px; font-size: 13px; color: var(--text-dim); }
+  .remain b{ color: var(--text); }
+  .done-tag{ color: var(--accent); font-weight: 600; }
+
+  .weekgrid{ display:flex; flex-direction: column; gap: 6px; }
+  .daybox{
+    display:flex; align-items:center; gap: 10px; padding: 8px 10px;
+    background: var(--surface-2); border-radius: 10px; border: 1px solid var(--line);
+  }
+  .daybox.today{ border-color: var(--accent); }
+  .daybox .dname{ width: 44px; font-size: 14px; color: var(--text-dim); }
+  .daybox.today .dname{ color: var(--accent); font-weight: 600; }
+  .daybox input{ flex:1; padding: 8px 10px; font-size: 15px; }
+  .daybox .unit{ font-size: 13px; color: var(--text-dim); width: 30px; }
+
+  table{ width: 100%; border-collapse: collapse; font-size: 14px; }
+  th{ text-align:left; color: var(--text-dim); font-weight: 500; padding: 6px 4px; border-bottom: 1px solid var(--line); }
+  td{ padding: 8px 4px; border-bottom: 1px solid var(--line); }
+  td.num{ text-align: right; font-family: 'Barlow Condensed', sans-serif; font-size: 16px; }
+  tr:last-child td{ border-bottom: none; }
+  .mini-track{ height: 6px; background: var(--surface-2); border-radius: 3px; overflow: hidden; width: 70px; display:inline-block; vertical-align: middle; margin-left: 6px; }
+  .mini-fill{ height:100%; background: var(--accent); }
+
+  .toast{
+    position: fixed; bottom: 18px; left: 50%; transform: translateX(-50%);
+    background: var(--accent); color: #08221A; padding: 10px 18px; border-radius: 10px;
+    font-size: 14px; font-weight: 600; opacity: 0; pointer-events: none; transition: opacity 0.25s ease;
+  }
+  .toast.show{ opacity: 1; }
+  .hint{ font-size: 12px; color: var(--text-dim); margin-top: 4px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="hero">
+    <div class="kicker">Kolegovia · September</div>
+    <h1>Mesačná výzva</h1>
+    <div class="sub">Cieľ: 150 min pohybu každý týždeň.</div>
+  </div>
+
+  <div class="card">
+    <h2>Ja som</h2>
+    <div class="whoami">
+      <select id="whoSelect"></select>
+      <button class="btn-ghost" id="newPersonBtn">+ Nový</button>
+    </div>
+    <div id="newPersonRow" class="row" style="display:none; margin-top:8px;">
+      <input type="text" id="newPersonInput" placeholder="Tvoje meno">
+      <button class="btn-primary" id="newPersonSave">Uložiť</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Dnes</h2>
+    <div class="row">
+      <input type="number" id="todayInput" placeholder="minúty" min="0" inputmode="numeric">
+      <button class="btn-primary" id="todaySave">Uložiť</button>
+    </div>
+    <div class="quickrow">
+      <button class="btn-ghost" data-add="10">+10</button>
+      <button class="btn-ghost" data-add="15">+15</button>
+      <button class="btn-ghost" data-add="20">+20</button>
+      <button class="btn-ghost" data-add="30">+30</button>
+      <button class="btn-ghost" data-add="45">+45</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Tento týždeň</h2>
+    <div id="barlabelWeek" class="barlabel"></div>
+    <div class="bartrack"><div class="barfill week" id="barWeek" style="width:0%"></div></div>
+    <div class="remain" id="remainWeek"></div>
+
+    <div style="height:16px"></div>
+
+    <div id="barlabelMonth" class="barlabel"></div>
+    <div class="bartrack"><div class="barfill month" id="barMonth" style="width:0%"></div></div>
+    <div class="remain" id="remainMonth"></div>
+  </div>
+
+  <div class="card">
+    <h2>Dni tohto týždňa</h2>
+    <div class="weekgrid" id="weekGrid"></div>
+  </div>
+
+  <div class="card">
+    <h2>Kolegovia — tento týždeň</h2>
+    <table id="leaderTable">
+      <thead><tr><th>Meno</th><th style="text-align:right">Min.</th><th></th></tr></thead>
+      <tbody id="leaderBody"></tbody>
+    </table>
+    <div class="hint">Údaje sú spoločné pre všetkých — uvidíte sa navzájom. Krížikom vymažeš meno aj jeho záznamy (napr. testovacie).</div>
+  </div>
+
+</div>
+
+<div class="toast" id="toast">Uložené</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getFirestore, doc, getDoc, setDoc, deleteDoc, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyBMDHjmghXzvmZg4CLHOza0pGnSE9aLFVo",
+  authDomain: "mato-4c693.firebaseapp.com",
+  projectId: "mato-4c693",
+  storageBucket: "mato-4c693.firebasestorage.app",
+  messagingSenderId: "906158124935",
+  appId: "1:906158124935:web:0d90a5abdfad7d0bf3ed22"
+};
+const fbApp = initializeApp(firebaseConfig);
+const db = getFirestore(fbApp);
+const ENTRIES_COL = "entries";
+
+const WEEKLY_GOAL = 150;
+const DAY_NAMES = ["Po","Ut","St","Št","Pi","So","Ne"];
+
+function pad(n){ return n.toString().padStart(2,'0'); }
+function toISO(d){ return d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate()); }
+function parseISO(s){ const [y,m,d] = s.split("-").map(Number); return new Date(y, m-1, d); }
+function getMonday(d){
+  const date = new Date(d);
+  const day = date.getDay(); // 0 Sun .. 6 Sat
+  const diff = (day === 0 ? -6 : 1 - day);
+  date.setDate(date.getDate() + diff);
+  date.setHours(0,0,0,0);
+  return date;
+}
+function weekDates(monday){
+  const arr = [];
+  for(let i=0;i<7;i++){
+    const d = new Date(monday);
+    d.setDate(monday.getDate()+i);
+    arr.push(d);
+  }
+  return arr;
+}
+function daysInMonth(d){ return new Date(d.getFullYear(), d.getMonth()+1, 0).getDate(); }
+function monthKeyPrefix(d){ return d.getFullYear()+"-"+pad(d.getMonth()+1); }
+
+const today = new Date();
+const monday = getMonday(today);
+const thisWeekDates = weekDates(monday);
+const monthGoal = Math.round(WEEKLY_GOAL/7 * daysInMonth(today));
+
+let participants = [];
+let myName = null;
+let myEntries = {}; // date -> minutes
+
+function showToast(msg){
+  const t = document.getElementById('toast');
+  t.textContent = msg || "Uložené";
+  t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'), 1400);
+}
+
+async function loadParticipants(){
+  try{
+    const snap = await getDocs(collection(db, ENTRIES_COL));
+    participants = snap.docs.map(d => d.id);
+  }catch(e){ participants = []; }
+}
+async function saveParticipants(){ /* participants list is derived from Firestore docs, nothing to save */ }
+async function loadMyName(){
+  try{ myName = localStorage.getItem('vyzva_myname') || null; }
+  catch(e){ myName = null; }
+}
+async function saveMyName(name){
+  myName = name;
+  try{ localStorage.setItem('vyzva_myname', name); }catch(e){}
+}
+async function loadEntries(name){
+  try{
+    const snap = await getDoc(doc(db, ENTRIES_COL, name));
+    return snap.exists() ? (snap.data().minutes || {}) : {};
+  }catch(e){ return {}; }
+}
+async function saveEntries(name, entries){
+  await setDoc(doc(db, ENTRIES_COL, name), { name, minutes: entries }, { merge: true });
+}
+async function deleteParticipant(name){
+  await deleteDoc(doc(db, ENTRIES_COL, name));
+}
+
+function weekSum(entries){
+  return thisWeekDates.reduce((sum,d)=> sum + (Number(entries[toISO(d)]) || 0), 0);
+}
+function monthSum(entries){
+  const prefix = monthKeyPrefix(today);
+  let sum = 0;
+  for(const k in entries){
+    if(k.startsWith(prefix)) sum += Number(entries[k]) || 0;
+  }
+  return sum;
+}
+
+function renderWhoSelect(){
+  const sel = document.getElementById('whoSelect');
+  sel.innerHTML = '<option value="">— vyber meno —</option>' +
+    participants.map(p => `<option value="${p}">${p}</option>`).join('');
+  if(myName) sel.value = myName;
+}
+
+async function renderBars(){
+  const wk = weekSum(myEntries);
+  const mo = monthSum(myEntries);
+
+  document.getElementById('barlabelWeek').innerHTML =
+    `<span class="name">Týždeň</span><span class="nums">${wk} <span class="goal">/ ${WEEKLY_GOAL} min</span></span>`;
+  document.getElementById('barWeek').style.width = Math.min(100, wk/WEEKLY_GOAL*100) + '%';
+  const remWk = Math.max(0, WEEKLY_GOAL - wk);
+  document.getElementById('remainWeek').innerHTML = remWk === 0
+    ? `<span class="done-tag">Cieľ splnený 🎉</span>`
+    : `Ešte chýba <b>${remWk} min</b> do týždenného cieľa.`;
+
+  document.getElementById('barlabelMonth').innerHTML =
+    `<span class="name">Mesiac</span><span class="nums">${mo} <span class="goal">/ ${monthGoal} min</span></span>`;
+  document.getElementById('barMonth').style.width = Math.min(100, mo/monthGoal*100) + '%';
+  const remMo = Math.max(0, monthGoal - mo);
+  document.getElementById('remainMonth').innerHTML = remMo === 0
+    ? `<span class="done-tag">Cieľ splnený 🎉</span>`
+    : `Ešte chýba <b>${remMo} min</b> do mesačného cieľa.`;
+}
+
+function renderWeekGrid(){
+  const grid = document.getElementById('weekGrid');
+  grid.innerHTML = '';
+  const todayISO = toISO(today);
+  thisWeekDates.forEach(d => {
+    const iso = toISO(d);
+    const isToday = iso === todayISO;
+    const box = document.createElement('div');
+    box.className = 'daybox' + (isToday ? ' today' : '');
+    box.innerHTML = `
+      <div class="dname">${DAY_NAMES[d.getDay()===0?6:d.getDay()-1]} ${d.getDate()}.</div>
+      <input type="number" min="0" inputmode="numeric" data-date="${iso}" value="${myEntries[iso] || ''}" placeholder="0">
+      <div class="unit">min</div>
+    `;
+    grid.appendChild(box);
+  });
+  grid.querySelectorAll('input').forEach(inp => {
+    inp.addEventListener('change', async (e) => {
+      const date = e.target.dataset.date;
+      const val = Number(e.target.value) || 0;
+      myEntries[date] = val;
+      await saveEntries(myName, myEntries);
+      await renderBars();
+      await renderLeaderboard();
+      showToast();
+    });
+  });
+}
+
+async function renderLeaderboard(){
+  const body = document.getElementById('leaderBody');
+  body.innerHTML = '<tr><td colspan="2" style="color:var(--text-dim)">Načítavam…</td></tr>';
+  const rows = [];
+  for(const p of participants){
+    const entries = (p === myName) ? myEntries : await loadEntries(p);
+    const wk = weekSum(entries);
+    rows.push({ name: p, wk });
+  }
+  rows.sort((a,b) => b.wk - a.wk);
+  body.innerHTML = rows.map(r => {
+    const pct = Math.min(100, r.wk / WEEKLY_GOAL * 100);
+    const me = r.name === myName ? ' style="color:var(--accent)"' : '';
+    return `<tr>
+      <td${me}>${r.name}${r.name===myName?' (ty)':''}</td>
+      <td class="num">${r.wk}<span class="mini-track"><span class="mini-fill" style="width:${pct}%"></span></span></td>
+      <td style="text-align:right"><button class="btn-ghost" data-remove="${r.name}" style="padding:4px 9px; font-size:13px;">✕</button></td>
+    </tr>`;
+  }).join('') || '<tr><td colspan="3" style="color:var(--text-dim)">Zatiaľ nikto.</td></tr>';
+
+  body.querySelectorAll('[data-remove]').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      const name = btn.dataset.remove;
+      if(!confirm(`Vymazať "${name}" a všetky jeho záznamy?`)) return;
+      participants = participants.filter(p => p !== name);
+      try{ await deleteParticipant(name); }catch(e){}
+      if(name === myName){
+        myName = null;
+        myEntries = {};
+        await saveMyName('');
+        document.getElementById('newPersonRow').style.display = 'flex';
+      }
+      renderWhoSelect();
+      renderWeekGrid();
+      await renderBars();
+      await renderLeaderboard();
+      showToast('Vymazané');
+    });
+  });
+}
+
+async function switchPerson(name){
+  if(!name) return;
+  if(!participants.includes(name)){
+    participants.push(name);
+    await saveEntries(name, {});
+  }
+  await saveMyName(name);
+  myEntries = await loadEntries(name);
+  renderWhoSelect();
+  renderWeekGrid();
+  await renderBars();
+  await renderLeaderboard();
+}
+
+document.getElementById('whoSelect').addEventListener('change', (e) => {
+  switchPerson(e.target.value);
+});
+document.getElementById('newPersonBtn').addEventListener('click', () => {
+  const row = document.getElementById('newPersonRow');
+  row.style.display = row.style.display === 'none' ? 'flex' : 'none';
+});
+document.getElementById('newPersonSave').addEventListener('click', async () => {
+  const val = document.getElementById('newPersonInput').value.trim();
+  if(!val) return;
+  document.getElementById('newPersonRow').style.display = 'none';
+  document.getElementById('newPersonInput').value = '';
+  await switchPerson(val);
+});
+
+document.getElementById('todaySave').addEventListener('click', async () => {
+  if(!myName){ showToast('Najprv vyber meno'); return; }
+  const val = Number(document.getElementById('todayInput').value) || 0;
+  const iso = toISO(today);
+  myEntries[iso] = val;
+  await saveEntries(myName, myEntries);
+  document.getElementById('todayInput').value = '';
+  renderWeekGrid();
+  await renderBars();
+  await renderLeaderboard();
+  showToast();
+});
+
+document.querySelectorAll('[data-add]').forEach(btn => {
+  btn.addEventListener('click', async () => {
+    if(!myName){ showToast('Najprv vyber meno'); return; }
+    const add = Number(btn.dataset.add);
+    const iso = toISO(today);
+    myEntries[iso] = (Number(myEntries[iso]) || 0) + add;
+    await saveEntries(myName, myEntries);
+    renderWeekGrid();
+    await renderBars();
+    await renderLeaderboard();
+    showToast('+' + add + ' min uložených');
+  });
+});
+
+async function init(){
+  await loadParticipants();
+  await loadMyName();
+  renderWhoSelect();
+  if(myName && participants.includes(myName)){
+    await switchPerson(myName);
+  } else {
+    document.getElementById('newPersonRow').style.display = 'flex';
+    await renderLeaderboard();
+  }
+}
+init();
+</script>
+</body>
+</html>
